@@ -8,7 +8,11 @@
 #include <iterator>
 #include <vector>
 #include <clocale>
+#include <cstdlib>
+#include <ctime>
+#define SMX 16
 #define MX 256
+#define MMX 65535
 #define LMX 1500000
 #define FIRST_SYM 33
 #define HIDELIM 89
@@ -37,9 +41,10 @@ public:
 	void setp(char * path); //set path
 	void Corrupt(); //hide a message
 	void GetMSG(); //get a message
-	//void Ressurect(); ressurect a corrupted picture
-	//void RIP(); corrupt a picture
-	void Shuffle(); //UPD: Merged corruption and ressurection into one function
+	void Shuffle(); //Merged corruption and ressurection into one function
+	void RecogN(); //UPD: Advanced ASCII symbols recognition
+	void Unable(); //UPD: Inability to get a message
+	void Party();
 	~Image(); 
 
 private:
@@ -50,7 +55,7 @@ private:
 	char num = '!';
 	char getn;
 	//corrupting data
-	unsigned int segment = 0;
+	int segment = 0;
 	//file streams
 	fstream imgW;
 	ifstream imgI; //UPD: Separated file streams for segmentation
@@ -79,8 +84,10 @@ void menu() {
 	cout << "1 - Hide a message in an image" << endl;
 	cout << "2 - Get a message from an image" << endl;
 	cout << "3 - Corrupt/Ressurect an image" << endl;
-	cout << "4 - Credits" << endl;
-	cout << "5 - Exit" << endl;
+	cout << "4 - Advanced ASCII search" << endl;
+	cout << "5 - Make a glitch party!" << endl;
+	cout << "6 - Credits" << endl;
+	cout << "7 - Exit" << endl;
 	cout << ">";
 	cin.clear();
 	cin >> ch;
@@ -88,7 +95,7 @@ void menu() {
 }
 
 void sw(int st) {
-	if ((st > 5) || (st < 0)) {
+	if ((st > 6) || (st < 0)) {
 		INCINP;
 		menu();
 	}
@@ -105,9 +112,15 @@ void sw(int st) {
 			img.Shuffle();
 			break;
 		case 4:
-			Credits();
+			img.RecogN();
 			break;
 		case 5:
+			img.Party();
+			break;
+		case 6:
+			Credits();
+			break;
+		case 7:
 			exit(0);
 			break;
 		default:
@@ -123,7 +136,7 @@ void Credits() {
 	system("cls");
 	cout << "=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=" << endl;
 	cout << "+                                 +" << endl;
-	cout << "=           ImCurr v0.2           =" << endl;
+	cout << "=        ImCurr v0.2.1a           =" << endl;
 	cout << "+                                 +" << endl;
 	cout << "=             Made by             =" << endl;
 	cout << "+   Sergey 'Ingenious' Rakhmanov  +" << endl;
@@ -141,10 +154,10 @@ void Salutation() {
 	menu();
 }
 
-bool msgchk(char * raw) {
+bool msgchk(char raw[MX]) {
 	for (int i = 0; i < strlen(raw); i++)
 	{
-		if (isascii(raw[i])) {
+		if (__isascii(raw[i])) {
 			if ((!isalpha(raw[i]))&&(!isdigit(raw[i]))) {
 				return false;
 			}
@@ -218,6 +231,7 @@ void Image::Corrupt()
 
 void Image::GetMSG()
 {
+	bool st = true;
 	memset(msg, 0, sizeof(msg));
 	system("cls");	
 	cout << "Message ressurection mode" << endl;
@@ -229,33 +243,136 @@ void Image::GetMSG()
 		int delta = abs(getn - (FIRST_SYM - 1));
 		imgW.seekg(-delta, imgW.cur);
 		imgW.getline(msg, getn - FIRST_SYM + 1);
-		SUCCESS
-		cout << "Hidden message: " << msg << endl;
-		cout << endl;
+		if (strlen(msg) > 0)
+		{
+			for (int i = 0; i < strlen(msg); i++)
+			{
+				if (__isascii(msg[i])) {
+					if ((!isalpha(msg[i])) && (!isdigit(msg[i]))) {
+						st = false;
+					}
+				}
+				else {
+					st = false;
+				}
+			}
+			if (st)
+			{
+				SUCCESS
+				cout << "Hidden message: " << msg << endl;
+				cout << endl;
+			}
+			else {
+				Unable();
+			}
+		}
+		else {
+			Unable();	
+		}
 	}
 	else {
-		FAILURE
-		cout << "---------------------" << endl;
-		cout << "Unable to decrypt a message, probably the file doesn't exist \n or the name given is wrong." << endl;
-		cout << "---------------------" << endl;
-		cout << endl;
+		Unable();
 	}
 	imgW.close();
+	menu();
+}
+
+void Image::Unable() {
+	char YorN[SMX] = { 0 };
+	FAILURE
+	cout << "---------------------" << endl;
+	cout << "Unable to decrypt a message, probably the file doesn't exist \n or the name given is wrong." << endl;
+	cout << "---------------------" << endl;
+	cout << endl;
+	cout << "Would you like an advanced ASCII symbols search?" << endl;
+	cout << "1 - Yes, 0 - No" << endl << endl << ">";
+	while (strlen(YorN) == 0) {
+		cin.getline(YorN, LMX);
+	}
+	if (YorN[0] == '1')
+	{
+		imgW.close();
+		RecogN();
+	}
+	else
+	{
+		imgW.close();
+		menu();
+	}
+}
+
+void Image::Party()
+{
+	memset(fullpathN, 0, sizeof(fullpathN));
+	srand(time(NULL));
+	system("cls");
+	cout << "Enter output file name: \n>";
+	while (strlen(fullpathN) == 0) {
+		cin.getline(fullpathN, LMX);
+	}
+	imgO.open(fullpathN, ios::trunc | ios::binary);
+	imgI.open(fullpath);
+	imgI.seekg(0, 2);
+	int size = imgI.tellg();
+	imgI.close();
+	int s1 = rand() % size;
+	int s2 = 0;
+	while (s2 < s1) 
+	{
+		s2 = rand() % size;
+	}
+	imgI.open(fullpath, ios::binary);
+	std::vector<char> fulldata((
+		std::istreambuf_iterator<char>(imgI)),
+		(std::istreambuf_iterator<char>()));
+	vector<char> dong;
+	dong.resize(size);
+	for (int i = 0; i < s1; i++)
+	{
+		dong[i] = fulldata[i];
+	}
+	for (int i = s2; i < fulldata.size(); i++)
+	{
+		dong[i-s2+s1] = fulldata[i];
+	}
+	for (int i = 0; i < dong.size(); i++)
+	{
+		imgO << dong[i];
+	}
+	imgI.close();
+	imgO.close();
+	system("cls");
 	menu();
 }
 
 void Image::Shuffle()
 {
 	system("cls");
+	tmpA.clear();
+	tmpB.clear();
+	tmp.clear();
+	int a = 0;
+	int buffer = 0;
+	int endpos = 0;
 	cout << "Image's segments shuffling mode." << endl;
-	cout << "Enter segment size (Recommended values between 100 and 2500): ";
-	cin >> segment;
 	imgW.open(fullpath);
 	imgW.seekg(0, 2);
 	int size = imgW.tellg();
-	int buffer = size % segment;
-	int endpos = size - buffer;
-	int a = 0;
+	cout << "File size: " << size << endl;
+	cout << "Enter segment size (MUST be less then file size): ";
+	cin >> segment;
+	if (segment < size)
+	{
+		buffer = size % segment;
+		endpos = size - buffer;
+	}
+	else
+	{
+		INCINP;
+		cout << "I said LESS!" << endl;
+		imgW.close();
+		menu();
+	}
 	imgW.close();
 	cout << "Enter destination file name: ";
 	while (strlen(fullpathN) == 0) {
@@ -266,7 +383,7 @@ void Image::Shuffle()
 	imgO.open(fullpathN, ios::trunc | ios::binary);
 	//cout << "size: " << size << ", buffer: " << buffer << ", endpos:" << endpos << endl;
 	//cout << "Pos1: " << imgW.tellg() << endl;												<- Another debugging
-	std::vector<char> fulldata((
+	vector<char> fulldata((
 		std::istreambuf_iterator<char>(imgI)),
 		(std::istreambuf_iterator<char>()));
 	tmpA.resize(segment);
@@ -304,6 +421,136 @@ void Image::Shuffle()
 	cout << endl;
 	imgI.close();
 	imgO.close();
+	//exit(42);
+	menu();
+}
+
+void Image::RecogN() 
+{
+	bool st = false;
+	char inp[MMX] = { 0 };
+	char ascii[MMX] = { 0 };
+	char asciiL[MMX] = { 0 };
+	char asciiU[MMX] = { 0 };
+	char asciiD[MMX] = { 0 };
+	char asciiS[MMX] = { 0 };
+	int a = 0;
+	int L = 0;
+	int U = 0;
+	int D = 0;
+	int S = 0;
+	system("cls");
+	imgI.open(fullpath, ios::binary);
+	std::vector<char> fulldata((
+		std::istreambuf_iterator<char>(imgI)),
+		(std::istreambuf_iterator<char>()));
+	for (size_t i = 0; i < fulldata.size(); i++)
+	{
+		if (__isascii(fulldata[i])) {
+			if ((isdigit(fulldata[i])) || (isalpha(fulldata[i])))
+			{
+				ascii[a] = fulldata[i];
+				a++;
+				st = true;
+			}
+			if (isdigit(fulldata[i]))
+			{
+				asciiD[D] = fulldata[i];
+				D++;
+			}
+			else if (isalpha(fulldata[i]))
+			{
+				if (islower(fulldata[i]))
+				{
+					asciiL[L] = fulldata[i];
+					L++;
+				}
+				else
+				{
+					asciiU[U] = fulldata[i];
+					U++;
+				}
+			}
+			else 
+			{
+				asciiS[S] = fulldata[i];
+				S++;
+			}
+		}
+	}
+	if (st) {
+		if (U > 0) {
+			cout << "ASCII Upper symbols:" << endl;
+			cout << asciiU << endl;
+			cout << endl;
+		}
+		if (L > 0)
+		{
+			cout << "ASCII Lower symbols:" << endl;
+			cout << asciiL << endl;
+			cout << endl;
+		}
+		if (D > 0)
+		{
+			cout << "ASCII Digits: " << endl;
+			cout << asciiD << endl;
+			cout << endl;
+		}
+	}
+	if (st) {
+		cout << "---------------------" << endl;
+		cout << "Save it to file? (type full name to save or type 1 to skip)" << endl;
+		while (strlen(inp) == 0) {
+			cin.getline(inp, LMX);
+		}
+		if ((strlen(inp) == 1)&&(inp[0] == 1))
+		{
+			memset(ascii, 0, sizeof(ascii));
+			memset(asciiL, 0, sizeof(asciiL));
+			memset(asciiU, 0, sizeof(asciiU));
+			memset(asciiD, 0, sizeof(asciiD));
+			memset(asciiS, 0, sizeof(asciiS));
+			menu();
+		}
+		else 
+		{
+			strcpy(fullpathN, inp);
+			imgO.open(fullpathN);
+			imgO << "----------------------------------------" << endl;
+			imgO << "ASCII Advanced search results, file name - " << fullpath << ": " << endl;
+			imgO << "----------------------------------------" << endl;
+			imgO << "All ASCII symbols:" << endl;
+			imgO << ascii << endl;
+			imgO << endl;
+			if (st) {
+				if (U > 0) {
+					imgO << "ASCII Upper symbols:" << endl;
+					imgO << asciiU << endl;
+					imgO << endl;
+				}
+				if (L > 0)
+				{
+					imgO << "ASCII Lower symbols:" << endl;
+					imgO << asciiL << endl;
+					imgO << endl;
+				}
+				if (D > 0)
+				{
+					imgO << "ASCII Digits: " << endl;
+					imgO << asciiD << endl;
+					imgO << endl;
+				}
+				if (S > 0)
+				{
+					imgO << "ASCII Specs: " << endl;
+					imgO << asciiS << endl;
+					imgO << endl;
+				}
+			}
+			imgO << "----------------------------------------" << endl;
+			imgO.close();
+		}
+	}
 	menu();
 }
 
@@ -312,7 +559,7 @@ Image::~Image()
 
 }
 
-int main() {
+int main(){
 	Salutation();
 	return 0;
 }

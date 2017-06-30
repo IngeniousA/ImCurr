@@ -1,7 +1,0 @@
-﻿  main.cpp
-c:\users\ingenious\documents\visual studio 2017\projects\imc\imc\main.cpp(145): warning C4018: <: несоответствие типов со знаком и без знака
-c:\users\ingenious\documents\visual studio 2017\projects\imc\imc\main.cpp(194): warning C4267: +=: преобразование из "size_t" в "char"; возможна потеря данных
-c:\users\ingenious\documents\visual studio 2017\projects\imc\imc\main.cpp(257): warning C4244: инициализация: преобразование "std::streamoff" в "int", возможна потеря данных
-  LINK : не найден или не выполнена сборка C:\Users\Ingenious\Documents\Visual Studio 2017\Projects\imc\Debug\imc.exe при последней инкрементной компоновке; выполняется полная компоновка
-  imc.vcxproj -> C:\Users\Ingenious\Documents\Visual Studio 2017\Projects\imc\Debug\imc.exe
-  imc.vcxproj -> C:\Users\Ingenious\Documents\Visual Studio 2017\Projects\imc\Debug\imc.pdb (Partial PDB)

@@ -19,7 +19,7 @@ Note. You can't decrypt files with ImCurr **0.3**, which were encrypted with ImC
   
   Everything which is ~~striked~~ was removed in **0.3** version
 ### How do I launch this application?
-  1. Go [here](https://yadi.sk/d/GKfPkF_n3KdVrn?ncrnd=6934), then press "Download" button. (For 0.2 version: [here](https://yadi.sk/d/0fQ_Bkfg3HsDpj?ncrnd=6934))
+  1. Go [here](https://yadi.sk/d/GKfPkF_n3KdVrn?ncrnd=6934), then press "Download" button. (For 0.2.1 version: [here](https://yadi.sk/d/0fQ_Bkfg3HsDpj?ncrnd=6934))
   2. Launch "imc.exe"
 ### I came across an issue, what should I do?
   1. Write [here](https://github.com/IngeniousA/ImCurr/issues) about an issue, I'll check it out.

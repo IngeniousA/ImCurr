@@ -54,3 +54,9 @@ std::string sha256(std::string input);
            | ((uint32) *((str) + 0) << 24);   \
 }
 #endif
+
+/*
+	SHA-256 C++ header
+	Made and provided by zedwood.com
+	http://www.zedwood.com/article/cpp-sha256-function
+*/

@@ -132,3 +132,9 @@ std::string sha256(std::string input)
 		sprintf(buf + i * 2, "%02x", digest[i]);
 	return std::string(buf);
 }
+
+/*
+	SHA-256 C++ source code
+	Made and provided by zedwood.com
+	http://www.zedwood.com/article/cpp-sha256-function
+*/

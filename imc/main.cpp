@@ -11,7 +11,10 @@
 #include <clocale>
 #include <cstdlib>
 #include <ctime>
+#include <conio.h>
+#include <stdio.h>
 #include "sha256.h"
+//#include "msglib.h"
 
 #define SMX 16
 #define MX 256
@@ -81,8 +84,28 @@ void Image::scsnD()
 	imgW.seekg(0, ios::end);
 	segm.size = imgW.tellg();
 	imgW.close();
-	cout << "Enter private key: \n>";
-	cin >> key.toCheck;
+	cout << "Enter private key: \n";
+	fflush(stdout);
+	int ch;
+	int it = 0;
+	while ((ch = _getch()) != EOF
+		&& ch != '\n'
+		&& ch != '\r'
+		&& it < sizeof(key.toCheck) - 1)
+	{
+		if (ch == '\b' && it > 0)
+		{
+			printf("\b \b");
+			fflush(stdout);
+			it--;
+			key.toCheck[it] = '\0';
+		}
+		else if (isalnum(ch))
+		{
+			putchar('*');
+			key.toCheck[it++] = (char)ch;
+		}
+	}
 	imgI.open(fullpath, ios::binary);
 	imgI >> autochk;
 	key.hash.resize(64);
@@ -219,10 +242,27 @@ void Image::scsnE()
 	}
 
 	cout << "Enter private key: \n>";
-	while (key.raw.length() == 0)
+	fflush(stdout);
+	int ch;
+	int it = 0;
+	while ((ch = _getch()) != EOF
+		&& ch != '\n'
+		&& ch != '\r'
+		&& it < sizeof(key.raw) - 1)
 	{
-		cin >> key.raw;
-	}
+		if (ch == '\b' && it > 0)
+		{
+			printf("\b \b");
+			fflush(stdout);
+			it--;
+			key.raw[it] = '\0';
+		}
+		else if (isalnum(ch))
+		{
+			putchar('*');
+			key.raw[it++] = (char)ch;
+		}
+	}	
 	key.fwd = key.raw.length() % SAFE_BORDER;
 	key.hash = sha256(key.raw);
 	
@@ -352,7 +392,7 @@ int main()
 }
 
 /*
-	ImCurr 0.3 source code.
+	ImCurr 0.3.1 source code.
 	Made by Sergey 'Ingenious' Rakhmanov, for free non-profit use.
 	If you want to contact me, there are my credits:
 

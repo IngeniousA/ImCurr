@@ -23,6 +23,7 @@
 #define FIRST_SYM 33
 #define HIDELIM 89
 #define SAFE_BORDER 20
+#define HASH 65
 
 char inputch[MX];
 using namespace std;
@@ -30,7 +31,7 @@ using namespace std;
 struct BasicKey
 {
 	int size = 64;
-	int fwd = 0;
+	char fwd = 0;
 	const int startpos = 65;
 	string raw;
 	string toCheck;
@@ -43,6 +44,7 @@ struct Segment
 	int size;
 	int buffer;
 	int endpos;
+	int segments;
 };
 
 struct Trloc
@@ -72,13 +74,6 @@ private:
 
 Image img;
 
-/*
-	TODO (0.4)
-	1. Processing label - DONE
-	2. Speed boost - DONE
-	3. Odd segments
-*/
-
 void Image::scsnD() //decryption
 {
 	BasicKey key; //initialization for key, shuffling strings and segment parameters
@@ -91,6 +86,7 @@ void Image::scsnD() //decryption
 	imgW.open(fullpath); //opening file stream for file size detection
 	imgW.seekg(0, ios::end);
 	segm.size = imgW.tellg();
+	segm.size -= HASH;
 	imgW.close();
 	cout << "Enter private key: \n"; //implementation for input mask
 	fflush(stdout);
@@ -120,50 +116,36 @@ void Image::scsnD() //decryption
 	imgI.close();
 	if (sha256(key.toCheck) == key.hash) //if password is correct
 	{
-		key.raw = key.toCheck;
-		key.fwd = key.raw.length() % SAFE_BORDER; //counting char shifting
+		key.fwd = key.toCheck.size() % SAFE_BORDER; //counting char shifting
 		cout << endl;
 		cout << "SHA-256 of entered string: \n/" + sha256(key.toCheck) + "/\n";
 		cout << "SHA-256 of key: \n/" + key.hash + "/\n";
 		cout << endl;
-		cout << "Size of file: " << segm.size << endl;
-		cout << "Enter size of part of file which was shuffled:\n";
-		cin >> segm.toEdit;
-		cout << "Enter segment size: \n";
-		cin >> segment; //getting segment size, buffer, etc
-		if (segment < segm.toEdit)
+		if (segm.size <= 5000) //automatic is now default
 		{
-			segm.buffer = segm.toEdit % segment;
-			segm.endpos = segm.toEdit - segm.buffer;
-			if ((segm.endpos % 2) == 1)
+			segm.toEdit = segm.size;
+			segment = 10;
+			segm.segments = segm.toEdit / segment;
+			if ((segm.segments % 2) == 1)
 			{
-				segm.buffer += segment;
-				segm.endpos = segm.toEdit - segm.buffer;
+				segm.segments--;
+				segm.toEdit -= segment;
 			}
 		}
 		else
 		{
-			segment = (segm.toEdit - 64) / 10;
-			segm.buffer = segm.toEdit % 10;
-			segm.endpos = segm.toEdit - segm.buffer;
-			if ((segm.endpos % 2) == 1)
-			{
-				segm.buffer += segment;
-				segm.endpos = segm.toEdit - segm.buffer;
-			}
-		}		
+			segm.toEdit = 1000;
+			segment = 10;
+			segm.segments = segm.toEdit / segment;
+		}
 		cout << "Enter destination file name: ";
 		while (strlen(fullpathN) == 0) {
 			cin.getline(fullpathN, LMX);
 		}
-		int pointer;
-		int startpos;
-		int toE2p = 0;
-		amode ? pointer = 66 : pointer = 65;
-		amode ? startpos = 66 : startpos = 65;
-		cout << "Prepairing to work...\n";
+		int pointer = HASH;
 		ifstream  src(fullpath, ios::binary); //new file streams for I/O
 		ofstream  dst(fullpathN, ios::binary);
+
 		char c; //geting chars which were shuffled
 		vector<char>toE2;
 		toE2.resize(segm.toEdit);
@@ -173,38 +155,36 @@ void Image::scsnD() //decryption
 			src.get(c);
 			toE2[i] = c;
 		}
-		cout << toE2.size() << "\n";
+		
 		trs.tmpA.resize(segment);
 		trs.tmpB.resize(segment);
-		trs.tmp.resize(segm.buffer);
-		int percentage = 0;
-		while (pointer < segm.endpos + startpos - segment) //shuffle them back
+		int used = 0;
+		int uSegments = 0;
+
+		while (uSegments < segm.segments) //SHUFFLE PROCESS
 		{
-			for (int i = 0; i < segment; i++) //get segment A
+			for (int i = 0; i < segment; i++)
 			{
-				trs.tmpA[i] = toE2[i + toE2p] - key.fwd;
+				trs.tmpA[i] = toE2[used + i];
 			}
-			pointer += segment;
-			toE2p += segment;
-			for (int i = 0; i < segment; i++) //get segment B 
+			uSegments++;
+			used += segment;
+			for (int i = 0; i < segment; i++)
 			{
-				trs.tmpB[i] = toE2[i + toE2p] - key.fwd;
+				trs.tmpB[i] = toE2[used + i];
 			}
-			pointer += segment;
-			toE2p += segment;
-			for (int i = 0; i < trs.tmpB.size(); i++) //send segment B
+			uSegments++;
+			used += segment;
+			for (int i = 0; i < segment; i++)
 			{
 				dst << trs.tmpB[i];
 			}
-			for (int i = 0; i < trs.tmpA.size(); i++) //send segment A
+			for (int i = 0; i < segment; i++)
 			{
 				dst << trs.tmpA[i];
 			}
 		}
-		for (int i = toE2p; i < toE2.size(); i++) //send buffer
-		{
-			dst << toE2[i];
-		}
+
 		dst << src.rdbuf(); //other information is just copied to destionation file
 		cout << endl;
 		src.close();
@@ -225,6 +205,7 @@ void Image::scsnD() //decryption
 void Image::scsnE() //encryption
 {
 	BasicKey key; //initialization for key, shuffling strings and segment parameters
+	key.raw.clear();
 	Trloc trs;
 	Segment segm;
 	int segment = 0; //setting default values
@@ -265,60 +246,28 @@ void Image::scsnE() //encryption
 			key.raw[it++] = (char)ch;
 		}
 	}	
-	key.fwd = key.raw.length() % SAFE_BORDER;
+	key.fwd = key.raw.size();
 	key.hash = sha256(key.raw);
-	cout << "\nOriginal size of file: " << segm.size << endl;
-	segm.toEdit = segm.size;
-	if (!amode)
+	if (segm.size <= 5000) //automatic is now default
 	{
-		char charr[MX] = "\0";
-		while ((charr[0] != 'y')&&(strlen(charr) != 1))
+		segm.toEdit = segm.size;
+		segment = 10;
+		segm.segments = segm.toEdit / segment;
+		if ((segm.segments % 2) == 1)
 		{
-			memset(charr, 0, sizeof(charr));
-			cout << "Enter size of part of file to encrypt: \n";
-			cin >> segm.toEdit; //get size of part of file which will be encrypted
-			cout << "To shuffle: " << ((double)segm.toEdit / (double)segm.size)*100 << "% of file size \n";
-			cout << "Enter y to continue" << "\n";
-			cin >> charr;
-		}	
-		
-		cout << "Enter segment size: \n>";
-		cin >> segment;
-		if (segment < segm.toEdit) //segment size less than the file size
-		{
-			segm.buffer = segm.toEdit % segment;
-			segm.endpos = segm.toEdit - segm.buffer;
-			if ((segm.endpos % 2) == 1) //if the number of segments doesn't divide by 2, it recreates suitable values
-			{
-				segm.buffer += segment; 
-				segm.endpos = segm.toEdit - segm.buffer;
-			}
-		}
-		else
-		{
-			segment = segm.toEdit / 10;
-			segm.buffer = segm.toEdit % 10;
-			segm.endpos = segm.toEdit - segm.buffer;
-			if ((segm.endpos % 2) == 1)
-			{
-				segm.buffer += segment;
-				segm.endpos = segm.toEdit - segm.buffer;
-			}
+			segm.segments--;
+			segm.toEdit -= segment;
 		}
 	}
 	else
 	{
-		segment = segm.size / 10;
-		segm.buffer = segm.size % 10;
-		segm.endpos = segm.size - segm.buffer;
-		if ((segm.toEdit - segm.buffer) % 2)
-		{
-			segm.buffer += segment;
-			segm.endpos = segm.toEdit - segm.buffer;
-		}
-	}
+		segm.toEdit = 1000;
+		segment = 10;
+		segm.segments = segm.toEdit / segment;
+	}	
 	ifstream  src(fullpath, ios::binary);
 	ofstream  dst(fullpathN, ios::binary); 
+
 	char c;
 	vector<char>toE2;
 	toE2.resize(segm.toEdit);
@@ -327,38 +276,40 @@ void Image::scsnE() //encryption
 		src.get(c);
 		toE2[i] = c;
 	}
+
 	dst << key.hash << '\0'; //send hash and '\0' char to divide the key part from the file part
+	
 	trs.tmpA.resize(segment);
 	trs.tmpB.resize(segment);
-	trs.tmp.resize(segm.buffer);
-	while (pointer < segm.endpos - segment)
+	int used = 0;
+	int uSegments = 0; 
+	while (uSegments < segm.segments) //SHUFFLE PROCESS
 	{
-		for (int i = pointer; i < pointer + segment; i++)
+		for (int i = 0; i < segment; i++)
 		{
-			trs.tmpA[i - pointer] = toE2[i] + key.fwd; //get segment A
+			trs.tmpA[i] = (char)(toE2[used + i] + key.fwd);
 		}
-		pointer += segment;
-		for (int i = pointer; i < pointer + segment; i++)
+		uSegments++;
+		used += segment;
+		for (int i = 0; i < segment; i++)
 		{
-			trs.tmpB[i - pointer] = toE2[i] + key.fwd; //get segment B
+			trs.tmpB[i] = (char)(toE2[used + i] + key.fwd);
 		}
-		pointer += segment;
-		for (int i = 0; i < trs.tmpB.size(); i++)
+		uSegments++;
+		used += segment;
+		for (int i = 0; i < segment; i++)
 		{
-			dst << trs.tmpB[i]; //send segment B
+			dst << trs.tmpB[i];
 		}
-		for (int i = 0; i < trs.tmpA.size(); i++)
+		for (int i = 0; i < segment; i++)
 		{
-			dst << trs.tmpA[i]; //send segment A
+			dst << trs.tmpA[i];
 		}
-	}
-	for (int i = segm.endpos - segment; i < toE2.size(); i++) //send buffer
-	{
-		dst << toE2[i];
 	}
 	dst << src.rdbuf();
 	src.close();
 	dst.close();
+	cout << endl;
 	system("pause");
 }
 
@@ -412,7 +363,7 @@ int main()
 }
 
 /*
-	ImCurr 0.4.0a source code.
+	ImCurr 0.4 source code.
 	Made by Sergey 'Ingenious' Rakhmanov, for free non-profit use.
 	If you want to contact me, there are my credits:
 

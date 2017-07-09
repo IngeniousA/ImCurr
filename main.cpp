@@ -135,46 +135,63 @@ void Image::scsnD() //decryption
 		{
 			segm.buffer = segm.toEdit % segment;
 			segm.endpos = segm.toEdit - segm.buffer;
+			if ((segm.endpos % 2) == 1)
+			{
+				segm.buffer += segment;
+				segm.endpos = segm.toEdit - segm.buffer;
+			}
 		}
 		else
 		{
 			segment = (segm.toEdit - 64) / 10;
 			segm.buffer = segm.toEdit % 10;
 			segm.endpos = segm.toEdit - segm.buffer;
+			if ((segm.endpos % 2) == 1)
+			{
+				segm.buffer += segment;
+				segm.endpos = segm.toEdit - segm.buffer;
+			}
 		}		
 		cout << "Enter destination file name: ";
 		while (strlen(fullpathN) == 0) {
 			cin.getline(fullpathN, LMX);
 		}
 		int pointer;
+		int startpos;
+		int toE2p = 0;
 		amode ? pointer = 66 : pointer = 65;
+		amode ? startpos = 66 : startpos = 65;
 		cout << "Prepairing to work...\n";
 		ifstream  src(fullpath, ios::binary); //new file streams for I/O
 		ofstream  dst(fullpathN, ios::binary);
 		char c; //geting chars which were shuffled
 		vector<char>toE2;
 		toE2.resize(segm.toEdit);
+		src.seekg(pointer, ios::beg);
 		for (int i = 0; i < segm.toEdit; i++)
 		{
 			src.get(c);
 			toE2[i] = c;
 		}
+		cout << toE2.size() << "\n";
 		trs.tmpA.resize(segment);
 		trs.tmpB.resize(segment);
 		trs.tmp.resize(segm.buffer);
 		int percentage = 0;
-		while (pointer < segm.endpos) //shuffle them back
+		while (pointer < segm.endpos + startpos - segment) //shuffle them back
 		{
-			for (int i = pointer; i < pointer + segment; i++) //get segment A
+			for (int i = 0; i < segment; i++) //get segment A
 			{
-				trs.tmpA[i - pointer] = toE2[i] - key.fwd;
+				trs.tmpA[i] = toE2[i + toE2p] - key.fwd;
 			}
 			pointer += segment;
-			for (int i = pointer; i < pointer + segment; i++) //get segment B 
+			toE2p += segment;
+			for (int i = 0; i < segment; i++) //get segment B 
 			{
-				trs.tmpB[i - pointer] = toE2[i] - key.fwd;
+				trs.tmpB[i] = toE2[i + toE2p] - key.fwd;
 			}
 			pointer += segment;
+			toE2p += segment;
 			for (int i = 0; i < trs.tmpB.size(); i++) //send segment B
 			{
 				dst << trs.tmpB[i];
@@ -183,6 +200,10 @@ void Image::scsnD() //decryption
 			{
 				dst << trs.tmpA[i];
 			}
+		}
+		for (int i = toE2p; i < toE2.size(); i++) //send buffer
+		{
+			dst << toE2[i];
 		}
 		dst << src.rdbuf(); //other information is just copied to destionation file
 		cout << endl;
@@ -267,9 +288,9 @@ void Image::scsnE() //encryption
 		{
 			segm.buffer = segm.toEdit % segment;
 			segm.endpos = segm.toEdit - segm.buffer;
-			if (((segm.toEdit - segm.buffer) % 2) == 1) //if the number of segments doesn't divide by 2, it recreates suitable values
+			if ((segm.endpos % 2) == 1) //if the number of segments doesn't divide by 2, it recreates suitable values
 			{
-				segm.buffer += segment;
+				segm.buffer += segment; 
 				segm.endpos = segm.toEdit - segm.buffer;
 			}
 		}
@@ -278,7 +299,7 @@ void Image::scsnE() //encryption
 			segment = segm.toEdit / 10;
 			segm.buffer = segm.toEdit % 10;
 			segm.endpos = segm.toEdit - segm.buffer;
-			if (((segm.toEdit - segm.buffer) % 2) == 1)
+			if ((segm.endpos % 2) == 1)
 			{
 				segm.buffer += segment;
 				segm.endpos = segm.toEdit - segm.buffer;
@@ -310,7 +331,7 @@ void Image::scsnE() //encryption
 	trs.tmpA.resize(segment);
 	trs.tmpB.resize(segment);
 	trs.tmp.resize(segm.buffer);
-	while (pointer < segm.endpos)
+	while (pointer < segm.endpos - segment)
 	{
 		for (int i = pointer; i < pointer + segment; i++)
 		{
@@ -330,6 +351,10 @@ void Image::scsnE() //encryption
 		{
 			dst << trs.tmpA[i]; //send segment A
 		}
+	}
+	for (int i = segm.endpos - segment; i < toE2.size(); i++) //send buffer
+	{
+		dst << toE2[i];
 	}
 	dst << src.rdbuf();
 	src.close();

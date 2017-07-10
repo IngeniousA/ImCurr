@@ -52,8 +52,6 @@ struct Trloc
 	int limit = MMX;
 	string tmpA;
 	string tmpB;
-	string tmp;
-	//vector<char>toShuffle;
 };
 
 class Image
@@ -81,8 +79,9 @@ void Image::scsnD() //decryption
 	Segment segm;
 	bool amode = false; //automatic mode = false
 	int segment = 0; //segment size
-	segm.buffer = 0; //setting zeros to prevent data mosh
+	segm.buffer = 0; //setting zeros to prevent data mess
 	segm.endpos = 0;
+	key.fwd = 0;
 	imgW.open(fullpath); //opening file stream for file size detection
 	imgW.seekg(0, ios::end);
 	segm.size = imgW.tellg();
@@ -103,11 +102,13 @@ void Image::scsnD() //decryption
 			fflush(stdout);
 			it--;
 			key.toCheck[it] = '\0';
+			key.fwd--; //counting char shifting
 		}
 		else if (isalnum(ch))
 		{
 			putchar('*');
 			key.toCheck[it++] = (char)ch;
+			key.fwd++; //counting char shifting
 		}
 	}
 	imgI.open(fullpath, ios::binary); //getting hash
@@ -115,8 +116,7 @@ void Image::scsnD() //decryption
 	key.hash.resize(64);
 	imgI.close();
 	if (sha256(key.toCheck) == key.hash) //if password is correct
-	{
-		key.fwd = key.toCheck.size() % SAFE_BORDER; //counting char shifting
+	{		
 		cout << endl;
 		cout << "SHA-256 of entered string: \n/" + sha256(key.toCheck) + "/\n";
 		cout << "SHA-256 of key: \n/" + key.hash + "/\n";
@@ -165,13 +165,13 @@ void Image::scsnD() //decryption
 		{
 			for (int i = 0; i < segment; i++)
 			{
-				trs.tmpA[i] = toE2[used + i];
+				trs.tmpA[i] = (char)(toE2[used + i] - key.fwd);
 			}
 			uSegments++;
 			used += segment;
 			for (int i = 0; i < segment; i++)
 			{
-				trs.tmpB[i] = toE2[used + i];
+				trs.tmpB[i] = (char)(toE2[used + i] - key.fwd);
 			}
 			uSegments++;
 			used += segment;
@@ -214,6 +214,7 @@ void Image::scsnE() //encryption
 	bool amode = false;
 	segm.buffer = 0;
 	segm.endpos = 0;
+	key.fwd = 0;
 	imgW.open(fullpath); //size detection
 	imgW.seekg(0, ios::end);
 	segm.size = imgW.tellg();
@@ -238,15 +239,16 @@ void Image::scsnE() //encryption
 			printf("\b \b");
 			fflush(stdout);
 			it--;
+			key.fwd--;
 			key.raw[it] = '\0';
 		}
 		else if (isalnum(ch))
 		{
 			putchar('*');
 			key.raw[it++] = (char)ch;
+			key.fwd++;
 		}
 	}	
-	key.fwd = key.raw.size();
 	key.hash = sha256(key.raw);
 	if (segm.size <= 5000) //automatic is now default
 	{
@@ -309,8 +311,6 @@ void Image::scsnE() //encryption
 	dst << src.rdbuf();
 	src.close();
 	dst.close();
-	cout << endl;
-	system("pause");
 }
 
 void Image::scsn() //menu

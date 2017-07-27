@@ -21,7 +21,7 @@
 #define MMX 65535
 #define LMX 1500000
 #define FIRST_SYM 33
-#define HIDELIM 89
+#define HIDELIM 255
 #define SAFE_BORDER 256
 #define HASH 65
 
@@ -59,7 +59,8 @@ class BasicFile
 {
 public:
 	void setp(char * path); //set path
-	void scsn(int index); //Subconsciuousness menu
+	void additional();
+	void scsn(); //Subconsciuousness menu
 	void scsnE(); //SCSN - encryption
 	void scsnD(); //SCSN - decryption
 	void hide(); //hide a message
@@ -231,6 +232,43 @@ void BasicFile::hide()
 	imgW.close();
 }
 
+void BasicFile::get()
+{
+	bool st = true;
+	char msg[MMX] = { 0 };
+	char getn = '\0';
+	memset(msg, 0, sizeof(msg));
+	system("cls");
+	cout << "Message ressurection mode" << endl;
+	imgW.open(fullpath);
+	imgW.seekg(-1, imgW.end);
+	imgW >> getn;
+	if ((getn > FIRST_SYM) && (getn < (FIRST_SYM + HIDELIM))) {
+		int delta = abs(getn - (FIRST_SYM - 1));
+		imgW.seekg(-delta, imgW.cur);
+		imgW.getline(msg, getn - FIRST_SYM + 1);
+		if (strlen(msg) > 0)
+		{
+			cout << "Hidden message: " << msg << endl;
+			system("pause");
+		}
+		else 
+		{
+			cout << "Failed to find a message, probably the file doesn't exist \n or the name given is wrong." << endl;
+			system("pause");
+		}
+	}
+	else
+	{
+		cout << "Failed to find a message, probably the file doesn't exist \n or the name given is wrong." << endl;
+		system("pause");
+	}
+	imgW.close();
+	scsn();
+}
+
+
+
 void BasicFile::scsnE() //encryption
 {
 	BasicKey key; //initialization for key, shuffling strings and segment parameters
@@ -343,13 +381,13 @@ void BasicFile::scsnE() //encryption
 	dst.close();
 }
 
-void BasicFile::scsn(int index) //menu
+void BasicFile::scsn() //menu
 {
 	system("cls");
 	cout << "1 - Encrypt a file" << endl
 		<< "2 - Decrypt a file" << endl
-		//<< "3 - Other" << endl
-		<< "3 - Exit" << endl;
+		<< "3 - Other" << endl
+		<< "4 - Exit" << endl;
 	char ch;
 	cin >> ch;
 	cin.clear();
@@ -361,14 +399,14 @@ void BasicFile::scsn(int index) //menu
 		scsnD();
 		break;
 	case '3':
-		//additional(ImQ[index]);
+		additional();
 		exit(0);
 		break;
 	case '4':
 		break;
 	default:
 		cout << "Incorrect input!" << endl;
-		scsn(index);
+		scsn();
 		break;
 	}
 }
@@ -393,9 +431,29 @@ void BasicFile::setp(char * path) //set path to file
 	}
 }
 
-void additional(BasicFile im)
+void BasicFile::additional()
 {
-	
+	system("cls");
+	cout << "1 - Hide a message" << endl
+		<< "2 - Get a message" << endl
+		<< "3 - Back" << endl;
+	char ch;
+	cin >> ch;
+	cin.clear();
+	switch (ch) {
+	case '1':
+		hide();
+		break;
+	case '2':
+		get();
+		break;
+	case '3':
+		scsn();
+	default:
+		cout << "Incorrect input!" << endl;
+		additional();
+		break;
+	}
 }
 
 int main()
@@ -423,7 +481,7 @@ int main()
 		qIndex = 0;
 		ImQ.resize(1);
 		ImQ[0].setp(inputch);
-		ImQ[0].scsn(qIndex);
+		ImQ[0].scsn();
 	}
 	return 0;
 }

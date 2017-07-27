@@ -22,11 +22,12 @@
 #define LMX 1500000
 #define FIRST_SYM 33
 #define HIDELIM 89
-#define SAFE_BORDER 20
+#define SAFE_BORDER 256
 #define HASH 65
 
 char inputch[MX];
 using namespace std;
+int qIndex = 0;
 
 struct BasicKey
 {
@@ -47,20 +48,24 @@ struct Segment
 	int segments;
 };
 
-struct Trloc
+struct Translocation
 {
 	int limit = MMX;
 	string tmpA;
 	string tmpB;
 };
 
-class Image
+class BasicFile
 {
 public:
 	void setp(char * path); //set path
-	void scsn(); //Subconsciuousness menu
+	void scsn(int index); //Subconsciuousness menu
 	void scsnE(); //SCSN - encryption
 	void scsnD(); //SCSN - decryption
+	void hide(); //hide a message
+	void get(); //get a message
+	void ascii();
+	void glitch();
 
 private:
 	char fullpath[MX]; //Input path
@@ -70,12 +75,16 @@ private:
 	ofstream imgO; 
 };
 
-Image img;
+vector<BasicFile> ImQ;
 
-void Image::scsnD() //decryption
+void BasicFile::scsnD() //decryption
 {
 	BasicKey key; //initialization for key, shuffling strings and segment parameters
-	Trloc trs;
+	key.raw.clear();
+	key.raw.resize(MX);
+	key.toCheck.clear();
+	key.toCheck.resize(MX);
+	Translocation trs;
 	Segment segm;
 	bool amode = false; //automatic mode = false
 	int segment = 0; //segment size
@@ -111,9 +120,13 @@ void Image::scsnD() //decryption
 			key.fwd++; //counting char shifting
 		}
 	}
-	imgI.open(fullpath, ios::binary); //getting hash
-	imgI >> key.hash;
-	key.hash.resize(64);
+	key.toCheck.resize(it);
+	key.hash.resize(64);	
+	imgI.open(fullpath, ios::in); //getting hash
+	for (size_t i = 0; i < 64; i++)
+	{
+		imgI.get(key.hash[i]);
+	}
 	imgI.close();
 	if (sha256(key.toCheck) == key.hash) //if password is correct
 	{		
@@ -147,13 +160,13 @@ void Image::scsnD() //decryption
 		ofstream  dst(fullpathN, ios::binary);
 
 		char c; //geting chars which were shuffled
-		vector<char>toE2;
-		toE2.resize(segm.toEdit);
+		vector<char>toShuffle;
+		toShuffle.resize(segm.toEdit);
 		src.seekg(pointer, ios::beg);
 		for (int i = 0; i < segm.toEdit; i++)
 		{
 			src.get(c);
-			toE2[i] = c;
+			toShuffle[i] = c;
 		}
 		
 		trs.tmpA.resize(segment);
@@ -165,13 +178,13 @@ void Image::scsnD() //decryption
 		{
 			for (int i = 0; i < segment; i++)
 			{
-				trs.tmpA[i] = (char)(toE2[used + i] - key.fwd);
+				trs.tmpA[i] = (char)(toShuffle[used + i] - key.fwd);
 			}
 			uSegments++;
 			used += segment;
 			for (int i = 0; i < segment; i++)
 			{
-				trs.tmpB[i] = (char)(toE2[used + i] - key.fwd);
+				trs.tmpB[i] = (char)(toShuffle[used + i] - key.fwd);
 			}
 			uSegments++;
 			used += segment;
@@ -192,7 +205,7 @@ void Image::scsnD() //decryption
 	}
 	else //incorrect password
 	{
-		cout << "Incorrect key!" << endl;
+		cout << "\nIncorrect key!" << endl;
 		cout << "SHA-256 of entered string: \n/" + sha256(key.toCheck) + "/\n";
 		cout << "SHA-256 of key: \n/" + key.hash + "/\n";
 		imgI.close();
@@ -202,15 +215,31 @@ void Image::scsnD() //decryption
 	exit(0);
 }
 
-void Image::scsnE() //encryption
+void BasicFile::hide()
+{
+	char num = '!';
+	char msg[MMX] = { 0 };
+	system("cls");
+	imgW.open(fullpath, ios::app);
+	cout << "Message: ";
+	while (strlen(msg) == 0)
+	{
+		cin.getline(msg, MMX);
+	}
+	num += strlen(msg);
+	imgW << msg << num;
+	imgW.close();
+}
+
+void BasicFile::scsnE() //encryption
 {
 	BasicKey key; //initialization for key, shuffling strings and segment parameters
 	key.raw.clear();
-	Trloc trs;
+	key.raw.resize(MX);
+	Translocation trs;
 	Segment segm;
 	int segment = 0; //setting default values
 	int pointer = 0;
-	char yn;
 	bool amode = false;
 	segm.buffer = 0;
 	segm.endpos = 0;
@@ -249,6 +278,7 @@ void Image::scsnE() //encryption
 			key.fwd++;
 		}
 	}	
+	key.raw.resize(it);
 	key.hash = sha256(key.raw);
 	if (segm.size <= 5000) //automatic is now default
 	{
@@ -271,12 +301,12 @@ void Image::scsnE() //encryption
 	ofstream  dst(fullpathN, ios::binary); 
 
 	char c;
-	vector<char>toE2;
-	toE2.resize(segm.toEdit);
+	vector<char>toShuffle;
+	toShuffle.resize(segm.toEdit);
 	for (int i = 0; i < segm.toEdit; i++)
 	{
 		src.get(c);
-		toE2[i] = c;
+		toShuffle[i] = c;
 	}
 
 	dst << key.hash << '\0'; //send hash and '\0' char to divide the key part from the file part
@@ -289,13 +319,13 @@ void Image::scsnE() //encryption
 	{
 		for (int i = 0; i < segment; i++)
 		{
-			trs.tmpA[i] = (char)(toE2[used + i] + key.fwd);
+			trs.tmpA[i] = (char)(toShuffle[used + i] + key.fwd);
 		}
 		uSegments++;
 		used += segment;
 		for (int i = 0; i < segment; i++)
 		{
-			trs.tmpB[i] = (char)(toE2[used + i] + key.fwd);
+			trs.tmpB[i] = (char)(toShuffle[used + i] + key.fwd); 
 		}
 		uSegments++;
 		used += segment;
@@ -313,12 +343,13 @@ void Image::scsnE() //encryption
 	dst.close();
 }
 
-void Image::scsn() //menu
+void BasicFile::scsn(int index) //menu
 {
 	system("cls");
-	cout << "1 - Encrypt a file" << endl 
-		 << "2 - Decrypt a file" << endl 
-		 << "3 - Exit" << endl;
+	cout << "1 - Encrypt a file" << endl
+		<< "2 - Decrypt a file" << endl
+		//<< "3 - Other" << endl
+		<< "3 - Exit" << endl;
 	char ch;
 	cin >> ch;
 	cin.clear();
@@ -330,40 +361,75 @@ void Image::scsn() //menu
 		scsnD();
 		break;
 	case '3':
+		//additional(ImQ[index]);
 		exit(0);
+		break;
+	case '4':
 		break;
 	default:
 		cout << "Incorrect input!" << endl;
-		scsn();
+		scsn(index);
 		break;
 	}
 }
 
-void Image::setp(char * path) //set path to file
+inline bool fileOK(const char * name) {
+	struct stat buffer;
+	return (stat(name, &buffer) == 0);
+}
+
+void BasicFile::setp(char * path) //set path to file
 {
-	strcpy(fullpath, path);
+	if (fileOK(path))
+	{
+		strcpy(fullpath, path);
+	}
+	else
+	{
+		cout << "Incorrect path!\n";
+		system("pause");
+		exit(0);
+		return;
+	}
+}
+
+void additional(BasicFile im)
+{
+	
 }
 
 int main()
 {
 	memset(inputch, 0, sizeof(inputch));
 	short int ch = 0;
+	int qSize = 0;
 	cout << "Name (1 to exit) \n>";
-	while (strlen(inputch) == 0) {
-		cin.getline(inputch, LMX);
+	while (strlen(inputch) == 0)
+	{
+		cin.getline(inputch, LMX);		
 	}
-	if ((inputch[0] == '1') && (strlen(inputch) == 1)) {
+	if ((inputch[0] == '1') && (strlen(inputch) == 1))
+	{
 		exit(0);
 	}
-	else {
-		img.setp(inputch);
+	else if ((inputch[0] == 'Q') && (strlen(inputch) == 1))
+	{
+		cout << "Enter the size of queue: ";
+		cin >> qSize;
+		ImQ.resize(qSize);
 	}
-	img.scsn();
+	else
+	{
+		qIndex = 0;
+		ImQ.resize(1);
+		ImQ[0].setp(inputch);
+		ImQ[0].scsn(qIndex);
+	}
 	return 0;
 }
 
 /*
-	ImCurr 0.4 source code.
+	ImCurr 0.4.1 source code.
 	Made by Sergey 'Ingenious' Rakhmanov, for free non-profit use.
 	If you want to contact me, there are my credits:
 

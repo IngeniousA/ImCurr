@@ -6,7 +6,11 @@ Simple tool to hide and recover messages in files, including file corruption and
 - Encryption/Decryption speed is **BOOOOOOOOOOOOOOOOOOSTED**, now this process doesn't consume too much time (*<0.1* sec VS *25* sec for *15*Mb file)
 - **Auto mode** is now default. You don't have to **remember** anything except password.
 
-Note. You can't decrypt files with ImCurr **0.4**, which were encrypted with ImCurr **0.2.1** - **0.3.1**
+#### 0.4.1 Changelog 
+- Fixed critical SHA-256 vulnerability.
+- Added file existence check to prevent crashes.
+
+Note. You can't decrypt files with ImCurr **0.4.1**, which were encrypted with ImCurr **0.2.1** - **0.3.1**
 
 ### What can I do in this application?
    Simply encrypt and decrypt files of any types with passsword protection. It's 100% free.

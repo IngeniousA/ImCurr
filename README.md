@@ -4,7 +4,8 @@ Simple tool to hide and recover messages in files, including file corruption and
 ## 0.4 version release!
 #### Changelog:
 - Encryption/Decryption speed is **BOOOOOOOOOOOOOOOOOOSTED**, now this process doesn't consume too much time (*<0.1* sec VS *25* sec for *15*Mb file)
-- **Auto mode** is now default. You don't have to **remember** anything except password.
+- **Auto mode** is now default. You don't have to **remember** anything except password
+- **Restored** function that hide and reveal **messages**
 
 #### 0.4.1 changelog:
 - Fixed critical SHA-256 vulnerability.

@@ -1,5 +1,4 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define _D_SCL_SECURE_NO_WARNINGS
 #define _ITERATOR_DEBUG_LEVEL 0 
 
 #include <iostream>
@@ -13,8 +12,8 @@
 #include <ctime>
 #include <conio.h>
 #include <stdio.h>
+#include <io.h>
 #include "sha256.h"
-//#include "msglib.h"
 
 #define SMX 16
 #define MX 256
@@ -25,15 +24,16 @@
 #define SAFE_BORDER 256
 #define HASH 65
 
-char inputch[MX];
 using namespace std;
+
+char inputch[MX];
 int qIndex = 0;
 
 struct BasicKey
 {
 	int size = 64;
 	char fwd = 0;
-	const int startpos = 65;
+	const int startpos = size + 1;
 	string raw;
 	string toCheck;
 	string hash;
@@ -60,13 +60,11 @@ class BasicFile
 public:
 	void setp(char * path); //set path
 	void additional();
-	void scsn(); //Subconsciuousness menu
+	void scsn();
 	void scsnE(); //SCSN - encryption
 	void scsnD(); //SCSN - decryption
 	void hide(); //hide a message
 	void get(); //get a message
-	void ascii();
-	void glitch();
 
 private:
 	char fullpath[MX]; //Input path
@@ -267,8 +265,6 @@ void BasicFile::get()
 	scsn();
 }
 
-
-
 void BasicFile::scsnE() //encryption
 {
 	BasicKey key; //initialization for key, shuffling strings and segment parameters
@@ -411,7 +407,8 @@ void BasicFile::scsn() //menu
 	}
 }
 
-inline bool fileOK(const char * name) {
+inline bool fileOK(const char * name) 
+{
 	struct stat buffer;
 	return (stat(name, &buffer) == 0);
 }
@@ -487,11 +484,11 @@ int main()
 }
 
 /*
-	ImCurr 0.4.1 source code.
+	ImCurr 0.4.1.1 source code.
 	Made by Sergey 'Ingenious' Rakhmanov, for free non-profit use.
 	If you want to contact me, there are my credits:
 
 	GitHub: IngeniousA
 	VK: vk.com/1ngenious
-	E-Mail: crashtranslator@yandex.ru
+	E-Mail: IngeniousA@yandex.ru
 */

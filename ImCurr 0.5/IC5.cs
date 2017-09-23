@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -45,56 +46,22 @@ namespace IC5
             return false;
         }
 
-        static void DecryptEngine(FileInfo src, FileInfo dest, byte fwd)
+        static void EDEngine(FileInfo src, FileInfo dest, string pwd, char isEncrypt)
         {
-
-            FileStream srcS = src.OpenRead();
-            FileStream destS = dest.Create();
-            int offset = 1000;
-            byte segment = 10;
-            byte segments = 100;
-            byte[] toEdit = new byte[offset];
-            byte[] tmpA = new byte[segment];
-            byte[] tmpB = new byte[segment];
-            byte used = 0;
-            
-            byte uSegments = 0;
-            srcS.Seek(65, SeekOrigin.Begin);
-            srcS.Read(toEdit, 0, offset);
-
-            while (uSegments < segments) //SHUFFLE PROCESS
+            FileInfo engInfo = new FileInfo("icengine.exe");
+            if (engInfo.Exists)
             {
-                for (byte i = 0; i < segment; i++)
-                {
-                    tmpA[i] = toEdit[(used + i)] - fwd;
-                }
-                uSegments++;
-                used += segment;
-                for (byte i = 0; i < segment; i++)
-                {
-                    tmpB[i] = toEdit[used + i] - fwd;
-                }
-                uSegments++;
-                used += segment;
-                for (int i = 0; i < segment; i++)
-                {
-                    destS.Write(tmpB, 0, segment);
-                }
-                for (int i = 0; i < segment; i++)
-                {
-                    destS.Write(tmpB, 0, segment);
-                }
+                ProcessStartInfo launch = new ProcessStartInfo();
+                launch.FileName = "icengine.exe";
+                string args = src.Name + " " + dest.Name + " " + pwd + " " + isEncrypt;
+                launch.Arguments = args;
+                Process.Start(launch);
             }
-        }
-
-        static void EncryptEngine(FileInfo src, FileInfo dest)
-        {
-            
-        }
-        
-        static string CreatePass(string src, FileInfo origin)
-        {
-            return "";
+            else
+            {
+                Console.WriteLine("Error: icengine.exe was modified or deleted.");
+                Console.Read();
+            }
         }
         /*
         static void ContainerCreation();
@@ -182,11 +149,10 @@ namespace IC5
                             Console.WriteLine();
                             if (BypassCheck(single, pass))
                             {
-                                byte forw = BitConverter.GetBytes(pass.Length).First();
                                 Console.WriteLine("Enter destination file name:");
                                 string destname = Console.ReadLine();
                                 dest = new FileInfo(destname);
-                                DecryptEngine(single, dest, forw);
+                                EDEngine(single, dest, pass, '0');
                             }
                             else
                             {
@@ -201,7 +167,34 @@ namespace IC5
                         }
                         else
                         {
-                            //ENCRYPION ENGINE
+                            Console.WriteLine("Enter password:");
+                            ConsoleKeyInfo key;
+                            string pass = "";
+                            do
+                            {
+                                key = Console.ReadKey(true);
+
+                                if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
+                                {
+                                    pass += key.KeyChar;
+                                    Console.Write("*");
+                                }
+                                else
+                                {
+                                    if (key.Key == ConsoleKey.Backspace && pass.Length > 0)
+                                    {
+                                        pass = pass.Substring(0, (pass.Length - 1));
+                                        Console.Write("\b \b");
+                                    }
+                                }
+                            }
+                            while (key.Key != ConsoleKey.Enter);
+                            Console.WriteLine();
+                            Console.WriteLine("Enter destination file name:");
+                            string destname = Console.ReadLine();
+                            destname += ".icf";
+                            dest = new FileInfo(destname);
+                            EDEngine(single, dest, pass, '1');
                         }
                     }
                     break;  

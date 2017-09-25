@@ -2,14 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
-#include <cctype>
 #include <iterator>
 #include <vector>
-#include <clocale>
 #include <cstdlib>
-#include <ctime>
-#include <conio.h>
-#include <stdio.h>
 #include <io.h>
 #include "sha256.h"
 
@@ -53,20 +48,16 @@ struct Translocation
 class BasicFile
 {
 public:
-	void scsnE(char sr[], char des[], char k[]); //SCSN - encryption
-	void scsnD(char sr[], char des[], char k[]); //SCSN - decryption
+	void Encrypt(char sr[], char des[], char k[]); 
+	void Decrypt(char sr[], char des[], char k[]); 
+	void Pack(char sr[], char des[], char k[]);
+	void Unpack(char sr[], char des[], char k[]);
 
 private:
-	char fullpath[MX]; //Input path
-	char fullpathN[MX]; //Output path
-	fstream imgW; //Size detection
-	ifstream imgI; //Separated file streams for segmentation (inactive in 0.4)
-	ofstream imgO;
+	fstream imgW; 
 };
 
-vector<BasicFile> ImQ;
-
-void BasicFile::scsnD(char sr[], char des[], char k[]) //decryption
+void BasicFile::Decrypt(char sr[], char des[], char k[]) //decryption
 {
 	BasicKey key; //initialization for key, shuffling strings and segment parameters
 	key.raw.clear();
@@ -135,7 +126,57 @@ void BasicFile::scsnD(char sr[], char des[], char k[]) //decryption
 	exit(0);
 }
 
-void BasicFile::scsnE(char sr[], char des[], char k[]) //encryption
+void BasicFile::Pack(char sr[], char des[], char k[])
+{
+	Translocation trs;
+	int toEdit = 1000;
+	int segment = 10;
+	int segments = toEdit / segment;
+	int shift = strlen(k);
+	ifstream  src(sr, ios::binary); 
+	ofstream  dst(des, ios::binary | ios::app);
+	dst.seekp(0, ios::end);
+	vector<char>toShuffle;
+	toShuffle.resize(toEdit);
+	char c;
+	for (int i = 0; i < toEdit; i++)
+	{
+		src.get(c);
+		toShuffle[i] = c;
+	}
+	trs.tmpA.resize(segment);
+	trs.tmpB.resize(segment);
+	int used = 0;
+	int uSegments = 0;
+	while (uSegments < segments) 
+	{
+		for (int i = 0; i < segment; i++)
+		{
+			trs.tmpA[i] = (char)(toShuffle[used + i] + shift);
+		}
+		uSegments++;
+		used += segment;
+		for (int i = 0; i < segment; i++)
+		{
+			trs.tmpB[i] = (char)(toShuffle[used + i] + shift);
+		}
+		uSegments++;
+		used += segment;
+		for (int i = 0; i < segment; i++)
+		{
+			dst << trs.tmpB[i];
+		}
+		for (int i = 0; i < segment; i++)
+		{
+			dst << trs.tmpA[i];
+		}
+	}
+	dst << src.rdbuf();
+	dst.close();
+	src.close();
+}
+
+void BasicFile::Encrypt(char sr[], char des[], char k[]) //encryption
 {
 	BasicKey key;
 	key.raw.clear();
@@ -215,16 +256,42 @@ int main(int argc, char *argv[])
 	char src[MMX];
 	char dst[MMX];
 	char pwd[MMX];
-	strcpy(src, argv[argc - 4]);
-	strcpy(dst, argv[argc - 3]);
-	strcpy(pwd, argv[argc - 2]);
-	if (argv[4][0] == '1')
+	
+	if (argv[argc - 1][0] == '1')
 	{
-		file.scsnE(src, dst, pwd);
+		strcpy(src, argv[argc - 4]);
+		strcpy(dst, argv[argc - 3]);
+		strcpy(pwd, argv[argc - 2]);
+		cout << "Processing...\n";
+		file.Encrypt(src, dst, pwd);
+	}
+	else if (argv[argc - 1][0] == '0')
+	{
+		strcpy(src, argv[argc - 4]);
+		strcpy(dst, argv[argc - 3]);
+		strcpy(pwd, argv[argc - 2]);
+		cout << "Processing...\n";
+		file.Decrypt(src, dst, pwd);
+	}
+	else if (argv[argc - 1][0] == '2')
+	{
+		int num = atoi(argv[argc - 2]);
+		cout << "Processing...\n";
+		for (int i = 3; i < num + 3; i++)
+		{
+			file.Pack(argv[argc - i], argv[1], argv[2]);
+		}
+		cout << "Done!\n";
 	}
 	else
 	{
-		file.scsnD(src, dst, pwd);
+		int num = atoi(argv[argc - 2]);
+		cout << "Processing...\n";
+		for (int i = 3; i < num + 3; i++)
+		{
+			file.Pack(argv[argc - i], argv[1], argv[2]);
+		}
+		cout << "Done!\n";
 	}
 	return 0;
 }

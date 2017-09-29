@@ -190,7 +190,18 @@ namespace IC5
                     {
                         toskips[i] += sizes[j];
                     }
-                    args += names[i] + " " + toskips[i] + " ";
+                    for (int j = 0; j < names[i].Length; j++)
+                    {
+                        if (names[i][j] == ' ')
+                        {
+                            args += '_';
+                        }
+                        else
+                        {
+                            args += names[i][j];
+                        }
+                    }
+                    args += " " + toskips[i] + " ";
                 }
                 args += "3";
                 ProcessStartInfo launch = new ProcessStartInfo

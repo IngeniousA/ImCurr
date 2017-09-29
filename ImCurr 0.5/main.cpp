@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstdlib>
 #include <io.h>
+#include <iomanip>
 #include "sha256.h"
 
 #define SMX 16
@@ -245,9 +246,6 @@ void BasicFile::Unpack(char sr[], char des[], char size[], char k[])
 		eraserO << toSave[i];
 	}
 	eraserO.close();
-	ofstream  ready("ready.icsys", ios::binary | ios::trunc);
-	ready << '\0';
-	ready.close();
 }
 
 void BasicFile::Encrypt(char sr[], char des[], char k[]) //encryption
@@ -375,10 +373,11 @@ int main(int argc, char *argv[])
 			strcpy(names[i - 4], argv[i]);
 			strcpy(sizes[i - 4], argv[i + 1]);
 		}
-		cout << "Processing...\n";
 		for (int i = 0; i < num * 2; i += 2)
 		{
 			file.Unpack(src, names[i], sizes[i], key);
+			system("cls");
+			cout << "Processing: " << fixed << setprecision(1) << ((double)i / 2) / double(num) * 100 << "%";
 		}
 		end();
 		cout << "Done!\n";

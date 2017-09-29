@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace IC5
@@ -23,11 +24,11 @@ namespace IC5
             Container = 2
         }
 
-        public static String sha256_hash(String value)
+        public static String SHA256(String value)
         {
-            using (SHA256 hash = SHA256.Create())
+            using (SHA256 hash = System.Security.Cryptography.SHA256.Create())
             {
-                return String.Concat(hash
+                return string.Concat(hash
                   .ComputeHash(Encoding.UTF8.GetBytes(value))
                   .Select(item => item.ToString("x2")));
             }
@@ -104,6 +105,7 @@ namespace IC5
             }
             number = num;
             names[num] = name;
+            hreader.Close();
         }
 
         static bool ValidPass(string toCheck)
@@ -127,7 +129,7 @@ namespace IC5
             {
                 pwdS += Convert.ToChar(pwd[i]);
             }
-            string hashed = sha256_hash(toCheck);
+            string hashed = SHA256(toCheck);
             if (pwdS == hashed)
             {
                 return true;
@@ -147,10 +149,23 @@ namespace IC5
                     args += c[i].Name + " ";
                 }
                 args += c.GetLength(0) + " " + "2";
-                ProcessStartInfo launch = new ProcessStartInfo();
-                launch.FileName = "icengine.exe";
-                launch.Arguments = args;
+                ProcessStartInfo launch = new ProcessStartInfo
+                {
+                    FileName = "icengine.exe",
+                    Arguments = args
+                };
                 Process.Start(launch);
+                FileInfo readyStat = new FileInfo("ready.icsys");
+                while (!readyStat.Exists)
+                {
+                    readyStat.Refresh();
+                    Thread.Sleep(500);
+                }
+                for (int i = 0; i < c.GetLength(0); i++)
+                {
+                    File.Delete(c[i].Name);
+                }
+                File.Delete("ready.icsys");
             }
             else
             {
@@ -161,6 +176,8 @@ namespace IC5
 
         static void Unpack(FileInfo confile, string conpwd)
         {
+            File.Copy(confile.Name, names[number] + ".ictTMP");
+            FileInfo tmp = new FileInfo(names[number] + ".ictTMP");
             FileInfo engInfo = new FileInfo("icengine.exe");
             if (engInfo.Exists)
             {
@@ -176,10 +193,22 @@ namespace IC5
                     args += names[i] + " " + toskips[i] + " ";
                 }
                 args += "3";
-                ProcessStartInfo launch = new ProcessStartInfo();
-                launch.FileName = "icengine.exe";
-                launch.Arguments = args;
+                ProcessStartInfo launch = new ProcessStartInfo
+                {
+                    FileName = "icengine.exe",
+                    Arguments = args
+                };
                 Process.Start(launch);
+                FileInfo readyStat = new FileInfo("ready.icsys");
+                while (!readyStat.Exists)
+                {
+                    readyStat.Refresh();
+                    Thread.Sleep(500);
+                }
+                File.Delete(confile.Name);
+                File.Copy(names[number] + ".ictTMP", confile.Name);
+                File.Delete(names[number] + ".ictTMP");
+                File.Delete("ready.icsys");
             }
             else
             {
@@ -193,8 +222,10 @@ namespace IC5
             FileInfo engInfo = new FileInfo("icengine.exe");
             if (engInfo.Exists)
             {
-                ProcessStartInfo launch = new ProcessStartInfo();
-                launch.FileName = "icengine.exe";
+                ProcessStartInfo launch = new ProcessStartInfo
+                {
+                    FileName = "icengine.exe"
+                };
                 string args = src.Name + " " + dest.Name + " " + pwd + " " + isEncrypt;
                 launch.Arguments = args;
                 Process.Start(launch);
@@ -208,7 +239,7 @@ namespace IC5
         static string CreateContainerHeader(FileInfo[] dir, string pwd, string cname)
         {
             string res = "";
-            string chash = sha256_hash(pwd);
+            string chash = SHA256(pwd);
             res += chash + '\0';
             res += cname + '\0';
             res += dir.GetLength(0);
@@ -274,8 +305,10 @@ namespace IC5
                 case "1":
                     Console.WriteLine("Enter file name:");
 
-                    OpenFileDialog openFile = new OpenFileDialog();
-                    openFile.Filter = "All files| *.*|Encrypted files (*.scsn, *.icf) | *.scsn, *.icf|Containers (*.ict) | *.ict";
+                    OpenFileDialog openFile = new OpenFileDialog
+                    {
+                        Filter = "All files| *.*|Encrypted files (*.scsn, *.icf) | *.scsn, *.icf|Containers (*.ict) | *.ict"
+                    };
 
                     OPEN_FILE: openFile.ShowDialog(); //диалог выбора файла (ваш кэп)
 
@@ -387,7 +420,7 @@ namespace IC5
                             if (BypassCheck(single, pass))
                             {
                                 ContainerView(single);
-                                Console.WriteLine("\n 1 - Unpack \n 2 - Unpack certain files \n 3 - Rename files \n 4 - Close");
+                                Console.WriteLine("\n 1 - Unpack \n 2 - Rename files \n 3 - Close");
                                 string conc = Console.ReadLine();
                                 switch(conc)
                                 {
@@ -400,14 +433,11 @@ namespace IC5
                                     case "3":
 
                                         break;
-                                    case "4":
-
-                                        break;
                                     default:
 
                                         break;
                                 }
-                                //sConsole.ReadLine();
+                                //Console.ReadLine();
                             }
                             else
                             {

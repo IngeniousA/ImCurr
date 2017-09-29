@@ -52,6 +52,7 @@ public:
 	void Decrypt(char sr[], char des[], char k[]); 
 	void Pack(char sr[], char des[], char k[]);
 	void Unpack(char sr[], char des[], char num[], char k[]);
+	void DeleteHeader(char sr[]);
 	long toSkip = 0;
 private:
 	fstream imgW; 
@@ -244,6 +245,9 @@ void BasicFile::Unpack(char sr[], char des[], char size[], char k[])
 		eraserO << toSave[i];
 	}
 	eraserO.close();
+	ofstream  ready("ready.icsys", ios::binary | ios::trunc);
+	ready << '\0';
+	ready.close();
 }
 
 void BasicFile::Encrypt(char sr[], char des[], char k[]) //encryption
@@ -320,6 +324,13 @@ void BasicFile::Encrypt(char sr[], char des[], char k[]) //encryption
 	dst.close();
 }
 
+void end()
+{
+	ofstream  ready("ready.icsys", ios::binary | ios::trunc);
+	ready << '\0';
+	ready.close();
+}
+
 int main(int argc, char *argv[])
 {
 	BasicFile file;
@@ -369,6 +380,7 @@ int main(int argc, char *argv[])
 		{
 			file.Unpack(src, names[i], sizes[i], key);
 		}
+		end();
 		cout << "Done!\n";
 	}
 	return 0;

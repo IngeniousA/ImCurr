@@ -1,14 +1,15 @@
 # ImCurr
 An absolutely free tool to encrypt/decrypt files or groups of them
 
-## Relevant versions (1.01.2018): 0.5, 0.6 BETA 1
+### Relevant versions (1.01.2018): 0.5, 0.6 BETA 1
 
 ## 0.5 version release!
 #### Changelog:
 - **GUI** made with C# and .Net
 - **Containers**. You can encrypt not only a single file, but also **folders**
 
-## 0.6 changelog:
+## 0.6 BETA 1 version release!:
+#### Changelog:
 - Now using **Blowfish** algorithm instead of my own, which makes protection way **powerful**
 - Increased **safe** file size from 1 Kb to 4.2 Gb!
 - Improved **GUI** by simplifying it

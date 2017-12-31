@@ -1,22 +1,24 @@
 # ImCurr
-Simple tool to hide and recover messages in files, including file corruption and ressurection.
+An absolutely free tool to encrypt/decrypt files or groups of them
 
-## 0.4 version release!
+## Relevant versions (1.01.2018): 0.5, 0.6 BETA 1
+
+## 0.5 version release!
 #### Changelog:
-- Encryption/Decryption speed is **BOOOOOOOOOOOOOOOOOOSTED**, now this process doesn't consume too much time (*<0.1* sec VS *25* sec for *15*Mb file)
-- **Auto mode** is now default. You don't have to **remember** anything except password
-- **Restored** function that hide and reveal **messages**
+- **GUI** made with C# and .Net
+- **Containers**. You can encrypt not only a single file, but also **folders**
 
-#### 0.4.1 changelog:
-- Fixed critical SHA-256 vulnerability.
-- Added file existence check to prevent crashes.
+## 0.6 changelog:
+- Now using **Blowfish** algorithm instead of my own, which makes protection way **powerful**
+- Increased **safe** file size from 1 Kb to 4.2 Gb!
+- Improved **GUI** by simplifying it
+- Temproary removed **contaier** en/de-cryption
 
-Note. You can't decrypt files with ImCurr **0.4.1**, which were encrypted with ImCurr **0.2.1** - **0.3.1**
+##### Note. You can't:
+##### - decrypt files with ImCurr **0.5**, which were encrypted with ImCurr **0.2.1** - **0.4.1.1**
+##### - decrypt files with ImCurr **0.6**, which were encrypted with ImCurr **0.2.1** - **0.5**
 
-### What can I do in this application?
-   Simply encrypt and decrypt files of any types with passsword protection. It's 100% free.
-   
-### How do I launch this application?
+### How can I download previous versions of this application?
   1. Go [here](https://yadi.sk/d/lxN53sFw3KgY9V)
   2. Find a suitable version
   3. Download it

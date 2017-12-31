@@ -16,7 +16,7 @@ An absolutely free tool to encrypt/decrypt files or groups of them
 - Now using **Blowfish** algorithm instead of my own, which makes protection way **powerful**
 - Increased **safe** file size from 1 Kb to 4.2 Gb!
 - Improved **GUI** by simplifying it
-- Temproary removed **contaier** en/de-cryption
+- Temproary removed **container** en/de-cryption
 
 ##### Note. You can't:
 ##### - decrypt files with ImCurr **0.5**, which were encrypted with ImCurr **0.2.1** - **0.4.1.1**

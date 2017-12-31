@@ -4,11 +4,14 @@ An absolutely free tool to encrypt/decrypt files or groups of them
 ### Relevant versions (1.01.2018): 0.5, 0.6 BETA 1
 
 ## 0.5 version release!
+#### Download [here](https://github.com/IngeniousA/ImCurr/releases/tag/0.5-engima1)
 #### Changelog:
 - **GUI** made with C# and .Net
 - **Containers**. You can encrypt not only a single file, but also **folders**
 
+
 ## 0.6 BETA 1 version release!
+#### Download [here](https://github.com/IngeniousA/ImCurr/releases/tag/0.6.0-beta1)
 #### Changelog:
 - Now using **Blowfish** algorithm instead of my own, which makes protection way **powerful**
 - Increased **safe** file size from 1 Kb to 4.2 Gb!

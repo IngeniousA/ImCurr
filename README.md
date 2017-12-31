@@ -8,7 +8,7 @@ An absolutely free tool to encrypt/decrypt files or groups of them
 - **GUI** made with C# and .Net
 - **Containers**. You can encrypt not only a single file, but also **folders**
 
-## 0.6 BETA 1 version release!:
+## 0.6 BETA 1 version release!
 #### Changelog:
 - Now using **Blowfish** algorithm instead of my own, which makes protection way **powerful**
 - Increased **safe** file size from 1 Kb to 4.2 Gb!

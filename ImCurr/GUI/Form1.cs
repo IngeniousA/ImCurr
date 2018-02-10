@@ -431,74 +431,105 @@ namespace UI6
 
         private void fileBtn_Click(object sender, EventArgs e)
         {
-            OPEN_FILE:
-            if (openFile.ShowDialog() != DialogResult.Cancel)
+            try
             {
-                string rawname = openFile.FileName;
-                try
+                OPEN_FILE:
+                if (openFile.ShowDialog() != DialogResult.Cancel)
                 {
-                    single = new FileInfo(rawname);
+                    string rawname = openFile.FileName;
+                    try
+                    {
+                        single = new FileInfo(rawname);
+                    }
+                    catch (ArgumentException)
+                    {
+                        Log("Cannot open selected file!", 3);
+                        goto OPEN_FILE;
+                    }
+                    if ((single.Name == "icengine.exe" || single.Name == AppDomain.CurrentDomain.FriendlyName) && (single.Directory.FullName == Environment.CurrentDirectory))
+                    {
+                        Log("Are you a retard?", 3);
+                        return;
+                    }
                 }
-                catch (ArgumentException)
-                {
-                    Log("Cannot open selected file!", 3);
-                    goto OPEN_FILE;
-                }
-                if (single.Name == "icengine.exe" || single.Name == AppDomain.CurrentDomain.FriendlyName)
-                {
-                    Log("Are you a retard?", 3);
-                    return;
-                }
-            }
-            else
-                return;            
-            switch (single.Extension)
-            {
-                case ".ic6":
-                    ftype = FileType.Encrypted;
-                    break;
-                case ".i6c":
-                    ftype = FileType.Container;
-                    break;
-                default:
-                    if (single.Extension == ".scsn" || single.Extension == ".ict" || single.Extension == ".icf")
-                        ftype = FileType.Old;
-                    else
-                        ftype = FileType.Basic;
-                    break;
-            }
-            if (ftype != FileType.Container)
-            {
-                if (single.Name.Length >= 25)
-                    Log("Selected file " + single.Name.Substring(0, 25) + "..., size: " + single.Length + " bytes, type: " + strType(ftype), 1);
                 else
-                    Log("Selected file " + single.Name + ", size: " + single.Length + " bytes, type: " + strType(ftype), 1);
+                    return;
+                switch (single.Extension)
+                {
+                    case ".ic6":
+                        ftype = FileType.Encrypted;
+                        break;
+                    case ".i6c":
+                        ftype = FileType.Container;
+                        break;
+                    default:
+                        if (single.Extension == ".scsn" || single.Extension == ".ict" || single.Extension == ".icf")
+                            ftype = FileType.Old;
+                        else
+                            ftype = FileType.Basic;
+                        break;
+                }
+                if (ftype != FileType.Container)
+                {
+                    if (single.Name.Length >= 25)
+                        Log("Selected file " + single.Name.Substring(0, 25) + "..., size: " + single.Length + " bytes, type: " + strType(ftype), 1);
+                    else
+                        Log("Selected file " + single.Name + ", size: " + single.Length + " bytes, type: " + strType(ftype), 1);
+                }
+                SwitchUI(ftype);
+                if (ftype == FileType.Container)
+                    ContainerView(single);
             }
-            SwitchUI(ftype);
-            if (ftype == FileType.Container)
-                ContainerView(single);                
+            catch (IOException)
+            {
+                MessageBox.Show("Error while getting a file, please change file name or try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+            }
+                        
         }
 
         private void dirBtn_Click(object sender, EventArgs e)
         {
-            ftype = FileType.Folder;
-            var folderOpen = new FolderBrowserDialog();
-            string cdirname = null;
-            if (folderOpen.ShowDialog() != DialogResult.Cancel)
+            try
             {
-                cdirname = folderOpen.SelectedPath;
-                cdir = new DirectoryInfo(cdirname);
+                ftype = FileType.Folder;
+                var folderOpen = new FolderBrowserDialog();
+                string cdirname = null;
+                if (folderOpen.ShowDialog() != DialogResult.Cancel)
+                {
+                    cdirname = folderOpen.SelectedPath;
+                    cdir = new DirectoryInfo(cdirname);
+                }
+                else
+                    return;
+                if (cdir.FullName == Environment.CurrentDirectory)
+                {
+                    Log("Are you a retard?", 3);
+                    return;
+                }
+                container = cdir.GetFiles();
+                for (int i = 0; i < container.Length; i++)
+                {
+                    for (int j = 0; j < container[i].Name.Length; j++)
+                    {
+                        if (container[i].Name[j] > 127)
+                        {
+                            Exception ex = new Exception();
+                            throw ex;
+                        }
+                    }
+                }
+                long fsize = 0;
+                for (int i = 0; i < container.Length; i++)
+                    fsize += container[i].Length;
+                Log("Selected folder " + cdir.Name + ", size of files: " + fsize + " bytes.", 0);
+                for (int i = 0; i < container.Length; i++)
+                    Log(" ├" + container[i].Name);
+                SwitchUI(ftype);
             }
-            else
-                return;
-            container = cdir.GetFiles();
-            long fsize = 0;
-            for (int i = 0; i < container.Length; i++)
-                fsize += container[i].Length;
-            Log("Selected folder " + cdir.Name + ", size of files: " + fsize + " bytes.", 0);
-            for (int i = 0; i < container.Length; i++)
-                Log(" ├" + container[i].Name);
-            SwitchUI(ftype);
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while getting files, please change directory or try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+            }            
         }
 
         private void nameBox_MouseUp(object sender, MouseEventArgs e)

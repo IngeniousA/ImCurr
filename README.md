@@ -1,7 +1,13 @@
 # ImCurr
 An absolutely free tool to encrypt/decrypt files or groups of them
 
-### Relevant versions (5.01.2018): 0.6
+### Relevant versions (2.06.2018): 0.7, 0.6
+
+## 0.7 version release!
+#### Download [here](https://github.com/IngeniousA/ImCurr/releases/tag/0.7.0)
+#### Changelog:
+- New **inject/eject** function that can inject one file stealthy into another one. The best thing is that it's really stealthy. It's so stealthy that file-recipient's size doesn't even change! *(It actually does, but none of OS can detect it)* And of course you can eject the information back.
+- Fixed bugs
 
 ## 0.6 version release!
 #### Download [here](https://github.com/IngeniousA/ImCurr/releases/tag/0.6.0)
@@ -13,7 +19,7 @@ An absolutely free tool to encrypt/decrypt files or groups of them
 
 ##### Note. You can't:
 ##### - decrypt files with ImCurr **0.5**, which were encrypted with ImCurr **0.2.1** - **0.4.1.1**
-##### - decrypt files with ImCurr **0.6**, which were encrypted with ImCurr **0.2.1** - **0.5**
+##### - decrypt files with ImCurr **0.6/0.7**, which were encrypted with ImCurr **0.2.1** - **0.5**
 
 ### How can I download previous versions of this application (0.2 - 0.4.1.1)?
   1. Go [here](https://yadi.sk/d/lxN53sFw3KgY9V)

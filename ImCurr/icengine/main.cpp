@@ -90,6 +90,30 @@ void unpack(char sr[], char des[], char size[], char k[], long skip)
 	src.close();
 }
 
+void inject(const char sr[], const char des[])
+{
+	string outN = string(des);
+	string srcN = string(sr);
+	outN += ":" + srcN + ".txt";
+	ofstream out(outN.c_str(), ios::binary | ios::trunc);
+	ifstream src(sr, ios::binary);
+	out << src.rdbuf();
+	out.close();
+	src.close();
+}
+
+void eject(const char sr[], const char des[])
+{
+	string outN = string(des);
+	string srcN = string(sr);
+	srcN += ":" + outN + ".txt";
+	ofstream out(outN.c_str(), ios::binary | ios::trunc);
+	ifstream src(srcN.c_str(), ios::binary);
+	out << src.rdbuf();
+	out.close();
+	src.close();
+}
+
 void end()
 {
 	ofstream  ready("ready.icsys", ios::binary | ios::trunc);
@@ -136,9 +160,19 @@ int main(int argc, char *argv[])
 			cout << "Processing: " << fixed << setprecision(2) << ((double)i / 2) / double(num) * 100 << "%";
 		}
 	}
+	else if (argv[argc - 1][0] == '4')
+	{
+		cout << "Processing...\n";
+		inject(argv[1], argv[2]);
+	}
+	else if (argv[argc - 1][0] == '5')
+	{
+		cout << "Processing...\n";
+		eject(argv[1], argv[2]);
+	}
 	else
 	{
-		cout << "Launched not by IC6, leaving...";
+		cout << "Launched not by ImCurr, leaving...";
 		return 0;
 	}
 	end();

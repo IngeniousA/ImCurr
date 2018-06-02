@@ -39,6 +39,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.logBox = new System.Windows.Forms.ListBox();
             this.openFile = new System.Windows.Forms.OpenFileDialog();
+            this.button1 = new System.Windows.Forms.Button();
             this.bpanel.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -73,19 +74,20 @@
             this.bpanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.bpanel.Location = new System.Drawing.Point(0, 0);
             this.bpanel.Name = "bpanel";
-            this.bpanel.Size = new System.Drawing.Size(596, 44);
+            this.bpanel.Size = new System.Drawing.Size(719, 44);
             this.bpanel.TabIndex = 2;
             // 
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.button1);
             this.panel2.Controls.Add(this.actionBtn);
             this.panel2.Controls.Add(this.pwdBox);
             this.panel2.Controls.Add(this.nameBox);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(191, 0);
+            this.panel2.Location = new System.Drawing.Point(193, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(405, 44);
+            this.panel2.Size = new System.Drawing.Size(526, 44);
             this.panel2.TabIndex = 3;
             // 
             // actionBtn
@@ -136,7 +138,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(191, 44);
+            this.panel1.Size = new System.Drawing.Size(193, 44);
             this.panel1.TabIndex = 2;
             // 
             // logBox
@@ -148,11 +150,11 @@
             this.logBox.ForeColor = System.Drawing.Color.White;
             this.logBox.FormattingEnabled = true;
             this.logBox.Items.AddRange(new object[] {
-            "Welcome to ImCurr 0.6!",
+            "Welcome to ImCurr 0.7!",
             "Please select file or folder to proceed..."});
             this.logBox.Location = new System.Drawing.Point(0, 47);
             this.logBox.Name = "logBox";
-            this.logBox.Size = new System.Drawing.Size(596, 299);
+            this.logBox.Size = new System.Drawing.Size(719, 299);
             this.logBox.TabIndex = 3;
             // 
             // openFile
@@ -160,19 +162,29 @@
             this.openFile.Filter = "All files| *.*|Encrypted files (*.scsn, *.icf, *.ic6) | *.scsn, *.icf, *.ic6|Cont" +
     "ainers (*.ict, i6c) | *.ict, *.i6c";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(404, 9);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(109, 23);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "Inject/Eject";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // mainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
-            this.ClientSize = new System.Drawing.Size(596, 346);
+            this.ClientSize = new System.Drawing.Size(719, 346);
             this.Controls.Add(this.logBox);
             this.Controls.Add(this.bpanel);
             this.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "mainForm";
-            this.Text = "ImCurr 0.6";
+            this.Text = "ImCurr 0.7";
             this.Load += new System.EventHandler(this.mainForm_Load);
             this.bpanel.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
@@ -194,6 +206,7 @@
         private System.Windows.Forms.Button actionBtn;
         private System.Windows.Forms.ListBox logBox;
         private System.Windows.Forms.OpenFileDialog openFile;
+        private System.Windows.Forms.Button button1;
     }
 }
 

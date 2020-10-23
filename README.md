@@ -1,33 +1,32 @@
 # ImCurr
-An absolutely free tool to encrypt/decrypt files or groups of them
+File encryptor with open source code.
 
-### Relevant versions (2.06.2018): 0.7, 0.6
+## Features
+- Encrypt and decrypt files using **Blowfish** algorithm
+- Compress folders into encrypted file containers
+- Inject one file into another and eject back
 
-## 0.7 version release!
-#### Download [here](https://github.com/IngeniousA/ImCurr/releases/tag/0.7.0)
-#### Changelog:
-- New **inject/eject** function that can inject one file stealthy into another one. The best thing is that it's really stealthy. It's so stealthy that file-recipient's size doesn't even change! *(It actually does, but none of OS can detect it)* And of course you can eject the information back.
-- Fixed bugs
+#### [Download](https://github.com/shoraii/ImCurr/releases/tag/0.7.1) (Win32)
+Both `ImCurr.exe` and `icengine.exe` have to be downloaded and placed in the same folder for proper work.
 
-## 0.6 version release!
-#### Download [here](https://github.com/IngeniousA/ImCurr/releases/tag/0.6.0)
-#### Changelog:
-- Now using **Blowfish** algorithm instead of my own, which makes protection way **powerful**
-- Increased **safe** file size from 1 Kb *(0.5)* / 4.2Gb *(0.6-beta1)* to **UNLIMITED**!
-- Improved **GUI** by simplifying it
-- Decreased encryption/decryption time. Now it takes <15 sec to **fully** encrypt a 128Mb file
+You can use ImCurr in CLI mode by executing `icengine` with arguments:
 
-##### Note. You can't:
-##### - decrypt files with ImCurr **0.5**, which were encrypted with ImCurr **0.2.1** - **0.4.1.1**
-##### - decrypt files with ImCurr **0.6/0.7**, which were encrypted with ImCurr **0.2.1** - **0.5**
+`./icengine source_file destined_file password mode`
 
-### How can I download previous versions of this application (0.2 - 0.4.1.1)?
-  1. Go [here](https://yadi.sk/d/lxN53sFw3KgY9V)
-  2. Find a suitable version
-  3. Download it
-  2. Launch "ImCurr.exe"
+`mode` is a number varying from 0 to 5 that sets processing mode:
 
-### I came across an issue, what should I do?
-  1. Write [here](https://github.com/IngeniousA/ImCurr/issues) about an issue, I'll check it out.
+0 - single file encryption
 
-#### To sum up, I can recommend you to check out Java implementation of ImCurr [here](https://github.com/ActisDEV/imCurrJVM/releases), which was made by @ActisDEV.
+1 - single file decryption
+
+2 - folder encryption
+
+3 - folder decryption
+
+4 - file injection
+
+5 - file ejection
+
+#### Other platforms
+- [Android](https://github.com/shoraii/ImCurrAE)
+- [Bot](https://github.com/shoraii/ImCurrBot)
